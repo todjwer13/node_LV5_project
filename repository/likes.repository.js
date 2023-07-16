@@ -8,8 +8,8 @@ class LikeRepository {
   createOne = async (data) => {
     return await Likes.create(data);
   };
-  delete = async (userId, postId) => {
-    return await this.Likes.destroy({ where: { postId, userId } });
+  deleteOne = async (target) => {
+    return await Likes.destroy({ where: { [Op.and]: target } });
   };
   findAllLikedPosts = async (target) => {
     return await Likes.findAll({
