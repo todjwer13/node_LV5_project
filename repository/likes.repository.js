@@ -1,27 +1,23 @@
-const { Posts, Likes } = require('../models');
-const { Op } = require('sequelize');
+const { Posts, Likes, Users } = require('../models');
+const { Op, Sequelize } = require('sequelize');
 
 class LikeRepository {
-  findOne = async (userId, postId) => {
-    return await this.Likes.findOne({ where: { postId, userId } });
+  findOne = async (target) => {
+    return await Likes.findOne({ where: { [Op.and]: target } });
   };
-  create = async (userId, postId) => {
-    return await this.Likes.create({ userId, postId });
+  createOne = async (data) => {
+    return await Likes.create(data);
   };
   delete = async (userId, postId) => {
     return await this.Likes.destroy({ where: { postId, userId } });
   };
-  findAllLikedPosts = async (userId) => {
-    return await this.Likes.findAll({
-      where: { userId },
-      attributes: [],
-      include: [
-        {
-          model: Posts,
-          order: [['likes', 'DESC']],
-          attributes: ['title', 'nickname', 'content', 'likes', 'createdAt', 'updatedAt'],
-        },
-      ],
+  findAllLikedPosts = async (target) => {
+    return await Likes.findAll({
+      where: { [Op.and]: target },
+      attributes: { include: [[Sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE PostId = Post.postId)`), 'likes']] },
+      include: [{ model: Posts }, { model: Users }],
+      raw: true,
+      nest: true,
     });
   };
 }

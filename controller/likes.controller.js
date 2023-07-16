@@ -7,26 +7,25 @@ class LikeController {
     try {
       const { userId } = res.locals.user;
       const { postId } = req.params;
-
-      await this.likeService.toggleLike(userId, postId);
-
-      res.status(200).json({ message: '좋아요 처리가 완료되었습니다.' });
+      const { code, message } = await this.likeService.putLike({ userId, postId });
+      return res.status(code).json({ message });
     } catch (err) {
+      if (err.code) return res.status(err.code).json({ message: err.message });
       console.error(err);
-      res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+      res.status(500).send('알 수 없는 에러가 발생');
     }
   };
 
   findLikePosts = async (req, res) => {
     try {
       const { userId } = res.locals.user;
-
-      const likePosts = await this.likeService.getLikedPosts(userId);
-
-      res.status(200).json({ likePosts });
+      const { postId } = req.params;
+      const { code, result } = await this.likeService.getLikePost({ userId, postId });
+      return res.status(code).json({ likePost: result });
     } catch (err) {
+      if (err.code) return res.status(err.code).json({ message: err.message });
       console.error(err);
-      res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+      res.status(500).send('알 수 없는 에러가 발생');
     }
   };
 }
